@@ -1,0 +1,254 @@
+---
+title: "Git"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+date: '2022-07-29'
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## Sistema de control de versiones
+
+
+
+Antiguamente los archivos se almacenaban de forma local y con códigos propios que no permitian la mejor trazabilidad. Ante esta necesidad nacen los sistemas de control de versiones (VCS), es un sistema que como dice su nombre permite llevar un control de los cambios registrados en un archivo o conjunto de archivos, pudiendo manejar diversas versiones de forma segura y ordenada. Pudiendo navegar entre el historial de un proyecto.  Estos sistemas son principalmente usados en el trabajo colaborativo, dado que permiten llevar un registro de que cambios se han realizado, cuando se realizaron y quien los realizo. Entre las multiples posibilidades existe Git que entra a reemplazar opciones como SVN.
+
+## ¿Qué es Git?
+
+
+
+Git es el sistema de control de versiones más utilizado, creado por [Linus Torvalds](https://github.com/torvalds). Git es un proyecto de código de fuente abierta. Los repositorios más populares que usan Git son Github (Para código abierto) y GitLab (para soluciones empresariales). 
+
+Git tiene como proposito la eficiencia, por lo que es recomendable usar Git con archivos de texto plano, dado que con estos archivos Git no necesita crear un nuevo archivo, únicamente se modifica la sección solicitada, evitando saturar la capacidad del repositorio. Al contrario de lo expuesto, no es recomendable guardar en el repositorio otros tipos de archivos, excepto sean pequeños y no se vayan a modificar, porque Git graba el archivo completo ante cada modificación, saturando la capacidad del repositorio.
+
+
+
+## Control de versiones
+
+
+
+El manejo del control de versiones en Git se realiza como se puede ver en el gráfico de abajo. Git permite tener un repositorio maestro (original o base como se prefiera llamarlo) y permite crear ramificaciones (branch) en las cuales se introducen cambios que posteriormente se pueden  unir al repositorio maestro.  
+
+
+
+
+![Control versiones Git](https://lh3.googleusercontent.com/-Txa_6CEnwuc/VmP4jONPIYI/AAAAAAAAB0o/Hjt91A7_1uo/s400-Ic42/pic1.jpg) <br>  
+
+
+
+Figura 1. Control versiones Git
+Fuente: https://jesuslc.com/2015/12/30/estrategias-de-branching-no-solo-existe-git-flow/
+
+
+
+## ¿Qué es Github?
+
+
+
+Plataforma web de desarrollo colaborativo para alojar proyectos utilizando el sistema de control de cambios de Git.
+
+## Partes de Git
+
+- Git Directory, Repository 
+- Working Directory
+- Staging Area
+
+## ¿Cómo ocurre el proceso?
+
+Los archivos en Git tienen tres estados: 
+- confirmado (committed): Los datos están seguros almacenados en la base de datos local
+- modificado (modified): el archivo se modifico pero aún no se ha guardado en la base de datos. 
+- preparado (staged): el archivo modificado esta listo en su versión actual para ser almacenado en la base de datos.
+
+
+![proceso git](https://git-scm.com/book/en/v2/images/areas.png)  
+
+
+Figura 2. Directorio de trabajo, área de almacenamiento y el directorio Git.
+Fuente: https://git-scm.com/book/es/v2/Inicio---Sobre-el-Control-de-Versiones-Fundamentos-de-Git
+
+El directorio de Git (Repository/repositorio en color gris claro) es un espacio virtual donde se almacena en el servidor (ej. Github) donde se almacenan los metadatos *(información de los archivos, cambios, quién lo hizo, entre otros)* y la base de datos de objetos para el proyecto. El repositorio es el núcleo de Git, y es la parte suceptible de ser clonada ya sea desde otro repositorio o computador.
+
+El directorio de trabajo (working directory/Directorio de trabajo en color naranja) esta en el computador donde se esta trabajando. Es el lugar donde se almacenan los archivos que se llaman un archivo del repositorio al computador, es decir, se hace una copia del archivo que está repositorio de Git al disco del computador para que pueda ser modificado, es una versión del proyecto. 
+
+En el área de preparación (Staging area/área de preparación/index) se almacenan temporalmente los archivos, que se subirán al repositorio, existentes o no en el directorio de Git. 
+
+## Flujo de trabajo
+
+
+- Se modifican unos archivos en el directorio de trabajo.
+
+- Cuando estén listos los archivos del área de trabajo se añaden al área de preparación.
+
+- Se confirman los cambios, es decir, los archivos del área de preparación
+se almacenan de manera permanente en el directorio de Git.
+
+"Si una versión concreta de un archivo está en el directorio de Git, se considera confirmada (committed). Si ha sufrido cambios desde que se obtuvo del repositorio, pero ha sido añadida al área de preparación, está preparada (staged). Y si ha sufrido cambios desde que se obtuvo del repositorio, pero no se ha preparado, está modificada (modified)." [git--distributed-is-the-new-centralized](https://git-scm.com/book/es/v2/Inicio---Sobre-el-Control-de-Versiones-Fundamentos-de-Git)
+
+## Branch o ramificaciones
+
+El repositorio original es el también llamado repositorio master, es lo que podríamos considerar el contenido definitivo. Como buena practica se recomienda generar una rama, y en esa rama realizar los commits (subir los archivos) de los cambios, experimentos o modificaciones, previo a ser fusionadas (merge) con  la rama principal. Cuando se combinan ramas es posible que aparezcan conflictos, algunos en especial cambios precisos Git los resuelve automaticamente, otros cambios podrían requerir un cambio manual. Crear ramas permite flujos de trabajo independientes, es posible crear todas las ramas que se deseen. 
+
+"Incluso se puede aprovechar el registro de cambios de Git para crear ramas, traer versiones viejas del código, arreglarlas y combinarlas de nuevo para mejorar el proyecto." [git--distributed-is-the-new-centralized](https://git-scm.com/book/es/v2/Inicio---Sobre-el-Control-de-Versiones-Fundamentos-de-Git)
+
+## Algunos comandos en git
+
+
+ *$ git init* -> Empezar en la carpeta seleccionada un repositorio de Git. Ahí se guardarán los cambios a los archivos.
+  *$ git add nombre_del_archivo.extensión* (ej. txt, jpg) -> Ahora git sabe que existe el archivo (está área de preparación (staging).) .. Pero para agregarlo...
+  *$ git commit* -> Sube el archivo del area de staging a la copia del repositorio en el computador. ¿y si quiero subirlo con comentario? Se usaría en su lugar...
+  *$ git commit -m "Mensaje que se quiere dejar"* -> Esta práctica permite entender a los demás la            modificación del archivo
+  
+  *** ¿Y si modifico el archivo? ***
+  *$ git add .* -> Se agrega todo lo que esta en la carpeta. ¿Y si solo quiero añadir uno"
+  *$ git add "Nombre_del_archivo.txt"* Como vimos antes aún falta subirlo. Entonces...
+  *$ git commit -m "Mensaje de lo que se modifico* -> Se subió al repositorio del computador
+  
+  Como se qué pasa con mis archivos ...
+  
+  *$ git status* -> Te mostrará si ya has añadido o no tus archivos git, es decir, describe su estado (untracked, ready to commit, nothing to commit).. ¿Y si quiero saber que cambios ha tenido mi base de datos? Entonces se usa...
+  
+  *$ git show* -> Mostrará todos los cambios historicos y quién los hizo (de todooos los archivos). Pero, ¿si solo quiero ver el historial de un archivo? Tienes dos opciones:
+  
+  *git show "nombre_del_archivo"*-> Ahora se muestran los cambios historicos de *únicamente ese archivo*.
+
+  *$ git log "nombre_del_archivo.extensión"* -> Ahora se muestran los cambios historicos y quien los hizo de *únicamente ese archivo*, es decir, muestra los commits realizados.
+  
+  ¿Por qué si hice el commit no los veo en mi repositorio en la nube? Bueno, la razón es que aún están en el repositorio del *Computador*. Para subirlo a la nube debes usar...
+  
+  *$ git push* -> Ahora estarán en la nube.
+
+ ¿Qué pasa si ahora necesito traer un archivo de la nube para trabajar sobre el? Ahora es el turno de ...
+
+ *$ git pull* -> Hace una copia del archivo que esta en la nube, en tu repositorio local (o sea en tu computador) y además a tu área de trabajo.
+
+¿Puedo traerlo al repositorio local pero no al área de trabajo (working directory)?
+Si con este comando
+
+*$ git fetch* -> Copia los archivos de la nube al repositorio local.
+
+Ya qué me recomendaron trabajar en un branch. ¿Cómo creo uno? Esto puede hacer usando el comando 
+*$ git branch <new branch>* -> Crea una nueva rama. 
+
+Ya tengo una rama pero no recuerdo el nombre, ¿qué puedo hacer? Usa el comando
+
+*$ git branch* -> Con este comando te aparecerá una lista de las ramas (branch) creadas
+
+Ya se como se llama ¿Cómo voy a la rama?
+
+*$ git checkout <nombre_de_la_rama>* -> Ahora estas en la rama. Si quieres fusionar esta rama con el master (repositorio original) puedes usar
+
+*$ git merge <nombre_de_la_rama>* -> Felicitaciones, tu branch se fusionó con el master. El sistema ha generado un nuevo commit.      
+
+
+## Otras opciones
+
+Dentro de los comandos de Git, existe un comando que permite grabar el directorio de trabajo y el índice y volver a un directorio limpio. Ese comando es *$ git stash* o si lo quieres completo *$ git stash push*. Sin embargo, *$ git stash* no es tan simple y tiene más de un argumento (como en el caso de arriba el push). Si quieres ver una lista de las modificaciones en que estabas trabajando puedes usar *$ git stash list*, si quieres inspeccionarlas usa *$ git stash show* y para volver a ellas (o sea restaurarlas) usa *$ git stash apply*. ¿Quieres aprender más de git stash? Sigue este [link](https://www.git-scm.com/docs/git-stash).
+
+¿Cómo puedo comentar un archivo? ... Usa...
+
+ *git comment -m* -> "mensaje que quiero enviar"	 
+
+¿Siempre tengo que usar git add y luego git commit? ¿Puedo saltar ese paso? Si, pero solo en archivos de los que ya tenga copia el repostorio, o sea, no para archivos nuevos. Para este fin puedes usar...
+
+ *git commit -am "mensaje que quiero enviar"* -> añade al  área de preparación (staging) y hace un commit, ¡si! todo en un solo comando 
+
+*git rm (. -r, nombre_del_archivo) (--cached)* -> Remueve los archivos en el index.
+
+*git config --global user.email <tu@email.com>* -> Configura tu email en Git.
+
+*git config --global user.name <tu_usuario_de_git>* -> Configura tu nombre (como quieres aparecer en los commits).
+
+*git config --list* -> Muestra una lista de las configuraciones.
+
+### Visualizar cambios en los archivos
+
+*git log --stat* -> Muestra una lista de los commits y además la cantidad de bytes añadidos y eliminados en todos los archivos que se han modificado.
+
+*git log --all --graph --decorate --oneline* -> muestra de manera comprimida toda la historia del repositorio de manera gráfica y embellecida.
+
+*git diff <commit1> <commit2>* -> compara diferencias entre en cambios confirmados.
+
+### Volver en el tiempo con branches y checkout
+
+*git reset <commit> -- soft/hard* -> ¿Recuerdas la lista de commit que vimos con log? Este comando permite regresar al commit elegido. ¿Qué implica?
+Qué se eliminan *todos* los cambios que se hicieron después de ese commit.
+
+¿Y si, solo quiero ver el estado pero no eliminar lo qué está en el staging, pues bueno, puedes usar 
+
+*git checkout <commit/branch> <nombre del archivo>* -> Permite ver la versión del archivo que estaba en ese commit o branch.
+
+Si aún no he hecho un commit, pero modifique el archivo y ya lo añadí, ¿tengo opción de eliminar los cambios? ¡Si!
+
+*git checkout -- <Ruta_al_archivo>* -> deshace los cambios que se hayan realizado en un archivo en estado "modified" (o sea, no ha sido agregado al staging). Esos cambios se pierden.
+
+
+## Practica
+
+### Empezando a usar Github
+
+1. Es necesario crear una cuenta en [Github](https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F&source=header-home). Es gratuita.
+2. En windows [descarga](https://git-scm.com/download/win) e instalalo. Y luego instala este [programa](https://desktop.github.com/) será tu terminal de trabajo en Git.
+3. En Mac puedes o [descargar este archivo](https://git-scm.com/) o usar el terminal.
+
+### En mac en el terminal
+
+Corre los siguientes comandos
+
+#### Opción 1
+
+xcode-select --install -> Instala xcode
+git --version -> verás la versión que tienes de git. Si git no esta instalado, preguntará si quieres instalarlo, dale que si y que xcode se encargue.
+
+#### Opción 2
+
+brew install git -> homebrew instalará git para ti
+git --version -> Revisa que versión te instaló
+
+### Configurando git - en el terminal
+
+Cualquier opción que hayas escogido, manual o por terminal, es hora de configurarlo. Son comandos que ya viste antes:
+
+git config --global user.name "tu_usuario_de_github"
+
+git config --global user.email "tu@email.com"
+
+Ya estas en Git, tu perfil en este caso quedo enlazado a gihub pero puedes enlazarlo al repositorio que tu quieras.
+
+## Practica
+
+Crea una nueva carpeta
+
+*mkdir /Users/[username]/Desktop/Tools/Git/Nueva_carpeta*
+
+Mueve el directorio a esa carpeta
+
+*cd /Users/[username]/Desktop/Tools/Git/NewFolder/*
+
+Ahora empieza en el repositorio
+
+*git init*
+
+Y ahora que empiecen ~los juegos~ la practica. Usa los comandos que aprendiste antes y sube tu primer archivo con comentario. Luego traelo y modificalo. Practica cada comando visto.
+
+## Practica más:
+  
+  Desarrollar el tutorial [Hello World](https://guides.github.com/activities/hello-world/)
+  
+## ¿De donde salió el contenido de este taller? De aquí:
+
+<https://warwick.ac.uk/research/rtp/sc/rse/training/introgit/introduction_to_version_control.pdf>
+<https://www.psiweb.org/docs/default-source/default-document-library/introduction-to-version-control-with-git-201905.pdf>
+<https://www.sciencedirect.com/science/article/pii/S1877050918314819>
+<https://docs.google.com/document/d/1ABxd-lB_nl1El3fF8dJDL7VeZpM6D3uAhK5I7QKKZuk/edit>
+<https://platzi.com/clases/1557-git-github/20215-que-es-git/>
+<https://git-scm.com/book/es/v2/Inicio---Sobre-el-Control-de-Versiones-Fundamentos-de-Git>
+<https://www.git-scm.com/docs/git-stash>
