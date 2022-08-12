@@ -1,0 +1,260 @@
+---
+title: "RETO"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+date: '2022-06-24'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, cargar librerias}
+if(!require("tidyverse")) install.packages("tidyverse") else print("tidyverse ya instalado") 
+library(tidyverse)
+#if(!require("haven")) install.packages("haven") else print("haven ya instalado")
+#library(haven)
+if(!require("readr")) install.packages("readr") else print("readr ya instalado")
+library(readr)
+library(ggplot2)
+if(!require("ggbreak")) install.packages("ggbreak") else print("ggbreak ya instalado")
+library(ggbreak)
+if(!require("lubridate")) install.packages("lubridate") else print("lubridate ya instalado")
+library(lubridate)
+if(!require("incidence")) install.packages("incidence") else print("incidence ya instalado")
+library(incidence)
+if(!require("epitrix")) install.packages("epitrix") else print("epitrix ya instalado")
+#library(epitrix)
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+datos<-readRDS("data/raw/bd_raw.RDS")
+names(datos) <- epitrix::clean_labels(names(datos))
+
+```
+
+-   Antes de iniciar, tenga en cuenta que este es un nuevo proyecto. No olvide crear un nuevo proyecto de R.
+
+## Caso hipotético de trabajo
+
+Usted es el responsable de la base de datos de casos positivos de COVID 19 en Colombia. Por tanto, es responsable por las solicitudes de información. Le han pedido un informe urgente y tiene una hora para presentar los resultados.
+
+La página donde usted ofrecer los datos de los casos positivos es: <https://www.datos.gov.co/Salud-y-Protecci-n-Social/Casos-positivos-de-COVID-19-en-Colombia/gt2j-8ykr/data>
+
+### Ejercicio 1
+
+-   El digitador cometió un error y cambio la palabra `residencia` por la palabra `casa`, la palabra `Extranjero` por la palabra `importado`, la palabra `Aislamiento` por la palabra `Tiempo`. Por lo tanto, se le solicita a usted que corrija este error. Por favor, escriba un código que resuelva este problema, la base de datos se va a actualizar y las posiciones de los datos pueden cambiar. Asegúrese que sin importar la fecha y la posisición de los datos en la base de datos, el código funcione.
+
+*Pista: La vAriable podRía Estar esCritA de DIFERENTES formas.*
+
+```{r}
+#verificando la ubicación del problema
+table(datos$ubicacion_del_caso)
+table(datos$tipo_de_recuperacion)
+table(datos$tipo_de_contagio)
+#solucionando problema casa
+datos$ubicacion_del_caso<-replace(datos$ubicacion_del_caso, datos$ubicacion_del_caso %in% c("casa","Casa","CASA"), "Residencia")
+#vericando el cambio casa
+table(datos$ubicacion_del_caso)
+#solucionando extranjero importado
+datos$tipo_de_contagio<-replace(datos$tipo_de_contagio,datos$tipo_de_contagio %in% c("Importado"),"Extranjero")
+#verificando cambio importado
+table(datos$tipo_de_contagio)
+#solucionando tiempo por aislamiento
+datos$tipo_de_recuperacion <- replace(datos$tipo_de_recuperacion,datos$tipo_de_recuperacion == "Tiempo", "Aislamiento")
+#verificando cambio aislamiento
+table(datos$tipo_de_recuperacion)
+```
+
+### Ejercicio 2
+
+-   Se requiere presentar las cifras sobre fallecimientos por COVID-19. Por favor reporte el número total de fallecimientos confirmados según sexo para cada mes solo durante 2021.
+
+*Pista 1: %Y/%m/%d no es el único formato que existe. Existen otros como %Y/%b/%d*
+
+```{r}
+#verificando sexo
+table(datos$sexo)
+#reemplazando sexo
+datos[datos$sexo %in% c("f","F"),"sexo"]<-"Feminino"
+datos$sexo[which (datos$sexo %in% c("m","M"))]<-"Masculino"
+#verificando cambio sexo
+table(datos$sexo)
+#creando una base de datos con el filtro
+
+fecha_de_muerte_formato <- datos %>% filter(between(as.Date(fecha_de_muerte), as.Date("2021-01-01"),as.Date("2021-12-31")))
+#cambiando formato de base de fecha para ver nombres
+fecha_de_muerte_formato$fecha_de_muerte <- format(as.Date(fecha_de_muerte_formato$fecha_de_muerte),'%Y/%B')
+#verificando tipo y valores
+typeof(fecha_de_muerte_formato$fecha_de_muerte)
+table(fecha_de_muerte_formato$fecha_de_muerte)
+#verificando como aparecen los fallecidos
+table(datos$estado)
+#Solución al problema
+print("Cantidad de fallecidos por sexo para cada mes/2021")
+table(fecha_de_muerte_formato$sexo,fecha_de_muerte_formato$estado,fecha_de_muerte_formato$fecha_de_muerte)[,"Fallecido",]
+```
+
+### Ejercicio 3
+
+-   Le solicitan una gráfica de las personas que reportaron enfermedad moderada y grave en la que se pueda observar la distinción por ubicación del caso y sexo. Por favor realice esta gráfica verificando que sea legible y los ejes y colores entendibles para cualquier público.
+
+```{r}
+table(datos$estado)
+
+dplot <- 
+  datos %>% filter(estado %in% c("Grave","Moderado"))
+
+pp1 <- ggplot(dplot) +
+  geom_bar(aes(x=ubicacion_del_caso ,fill=sexo))
+
+pp1 + 
+  xlab("Ubicación del caso") + 
+  ylab("Número de casos moderados y graves") +
+  theme(axis.text.x = element_text(face="bold", color="#BC35AC", size=12, angle=30),
+        axis.text.y = element_text(face="bold", color="#BC35AC", size=12, angle=30),
+        axis.title.x=element_text(face="bold", color="#BC35AC", size=14),
+        axis.title.y=element_text(face="bold", color="#BC35AC", size=14, angle=90),
+        legend.text=element_text(face="bold", color="#BC35AC", size=10),
+        legend.title=element_text(face="bold", color="#BC35AC", size=14))
+
+```
+
+
+
+### Ejercicio 4
+
+-   El digitador *otra vez* cometió un error: los datos de fecha de muerte y recuperación de las personas entre 30 y 35 años registrados el día 2 de marzo de 2021 debían ser registrados el día 2 de marzo de 2020. Es importante destacar, estos problemas parecen ser repetitivos, Por favor cree una `función` para corregir este tipo de errores.
+
+*Pista: Si tiene una función hecha y cree que puede usarla puede ser de gran ayuda.*
+
+```{r}
+corrige_fechas <- function(fecha_mal, fecha_bien, col_fechas){
+  
+  
+  col.modif<- as_date(col_fechas)
+  
+  fecha_mal <- as_date(fecha_mal)
+  
+  fecha_bien<- as_date(fecha_bien)
+  
+  col.modif[col.modif %in% fecha_mal] <- fecha_bien
+  
+  return(col.modif)
+}
+
+datos$fecha_reporte_web <- as.Date(datos$fecha_reporte_web)
+
+datos %>% filter(edad >= 30 & edad <=35) %>% select(fecha_reporte_web) %>%
+  filter( .== "2020-03-02") %>% table()
+datos %>% filter(edad >= 30 & edad <=35) %>% select(fecha_reporte_web) %>%
+  filter( .== "2021-03-02") %>% table()
+#Applicando correción 
+datos[datos$edad >=30 & datos$edad <=35,]$fecha_reporte_web  <- corrige_fechas(fecha_mal = "2021-03-02" ,fecha_bien = "2020-03-02", col_fechas = datos[datos$edad >=30 & datos$edad <=35,]$fecha_reporte_web)
+
+#Verificando corrección 
+
+datos %>% filter(edad >= 30 & edad <=35) %>% select(fecha_reporte_web) %>%
+  filter( .== "2020-03-02") %>% table()
+
+```
+
+
+### Ejercicio 5
+
+-   Por favor cree una función que solicite los siguientes argumentos: base de datos y ciudad. Incluya dentro de la función un elemento tipo ggplot que grafique la incidencia mensual y bimestral y que incluya el color negro para fallecidos y verde para vivos.
+
+```{r}
+Graf.muer.diag<- function(bd,nb_diag, nb_muerte, nivel, lugar, fecha_de_diagnostico){
+  
+  bd[[nb_diag]] <- as.Date(bd[[nb_diag]])
+  
+  bd <- bd %>% filter(between(x = as_date(bd[[nb_diag]]), left = as_date("2021-01-01"),right = as_date("2021-12-31"))) 
+  
+  diag<-as_date(bd[bd[[nivel]]==lugar,][[nb_diag]])
+  
+  muerte<-as_date(bd[bd[[nivel]]==lugar,][[nb_muerte]])
+  
+  diag_sem <- incidence(diag, interval = 30)
+  muer_sem <- incidence(muerte, interval = 30)
+  
+  diag_sem_df <- as.data.frame(diag_sem) %>% mutate(class = "Diagnosticos")
+  
+  muerte_sem_df <- as.data.frame(muer_sem) %>% mutate(class = "Muertes")
+  
+  diag_muer_sem_df <- rbind(diag_sem_df, muerte_sem_df)
+  diag_muer_sem_df$dates <- diag_muer_sem_df$dates %>% as.Date()
+  
+  grafica <- ggplot(data = diag_muer_sem_df) +
+    geom_bar(aes(x = dates, y = counts, fill = class), stat = "identity")+
+    scale_x_date(date_breaks = "10 week", date_labels = "%W-%Y")+
+    scale_fill_manual(values = c("Diagnosticos"="green","Muertes"="black"))+
+    ggtitle(paste("Incidencia para", lugar))+
+    theme(axis.text.x = element_text(face="bold", color="#2F4F4F", size=8, angle=90))
+  return(grafica)
+}
+
+Graf.muer.diag(bd = datos, nb_diag = "fecha_de_diagnostico", nb_muerte = "fecha_de_muerte",
+                  nivel ="nombre_municipio", lugar = "BOGOTA")
+
+
+```
+
+
+### Ejercicio 6
+
+-   Haciendo uso de la función del Ejercicio 5, por favor grafique un comparativo por ubicación del caso durante 2022.
+
+*Pista : puede usar la función **plot_grid** de la librería **cowplot**
+
+
+```{r, Sol.2}
+Graf.muer.diag<- function(bd,nb_diag, nb_muerte, nivel, lugar, fecha_de_diagnostico){
+  
+  bd[[nb_diag]] <- as.Date(bd[[nb_diag]])
+  
+  bd <- bd %>% filter(between(x = as_date(bd[[nb_diag]]), left = as_date("2021-01-01"),right = as_date("2021-12-31"))) 
+  
+  diag<-as_date(bd[bd[[nivel]]==lugar,][[nb_diag]])
+  
+  muerte<-as_date(bd[bd[[nivel]]==lugar,][[nb_muerte]])
+  
+  diag_sem <- incidence(diag, interval = 30)
+  muer_sem <- incidence(muerte, interval = 30)
+  
+  diag_sem_df <- as.data.frame(diag_sem) %>% mutate(class = "Diagnosticos")
+  
+  muerte_sem_df <- as.data.frame(muer_sem) %>% mutate(class = "Muertes")
+  
+  diag_muer_sem_df <- rbind(diag_sem_df, muerte_sem_df)
+  diag_muer_sem_df$dates <- diag_muer_sem_df$dates %>% as.Date()
+  
+  grafica <- ggplot(data = diag_muer_sem_df) +
+    geom_bar(aes(x = dates, y = counts, fill = class), stat = "identity")+
+    scale_x_date(date_breaks = "10 week", date_labels = "%W-%Y")+
+    scale_fill_manual(values = c("Diagnosticos"="green","Muertes"="black"))+
+    ggtitle(paste("Incidencia para", lugar))+
+    theme(axis.text.x = element_text(face="bold", color="#2F4F4F", size=8, angle=90))
+  return(grafica)
+}
+
+p1 <- Graf.muer.diag(bd = datos, nb_diag = "fecha_de_diagnostico", nb_muerte = "fecha_de_muerte",
+                  nivel ="nombre_departamento", lugar = "CAUCA")
+
+p2 <- Graf.muer.diag(bd = datos, nb_diag = "fecha_de_diagnostico", nb_muerte = "fecha_de_muerte",
+                  nivel ="nombre_departamento", lugar = "NARIÑO")
+
+p3 <- Graf.muer.diag(bd = datos, nb_diag = "fecha_de_diagnostico", nb_muerte = "fecha_de_muerte",
+                  nivel ="nombre_departamento", lugar = "SANTANDER")
+gridExtra::grid.arrange(p1, p2, p3, ncol = 2)
+```
+
+### Autoría
+
+*Primer Borrador*: Jose M Velasco
+
+*Ajustes y correcciones*: Zulma M Cucunubá
